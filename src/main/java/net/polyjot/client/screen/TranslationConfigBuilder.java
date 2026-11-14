@@ -4,6 +4,9 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.gui.entries.StringListEntry;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.polyjot.client.LanguageHotReloader;
 import net.polyjot.data.ModTranslationData;
 import net.polyjot.data.TranslationEntry;
@@ -42,33 +45,64 @@ public class TranslationConfigBuilder {
             }
         }
 
+        List<MultilineTranslationListEntry> allEntries = new ArrayList<>();
+
         if (!gameplayEntries.isEmpty()) {
             ConfigCategory gameplayCat = builder.getOrCreateCategory(Component.literal("Gameplay (" + countTranslated(gameplayEntries) + "/" + gameplayEntries.size() + ")"));
             for (TranslationEntry entry : gameplayEntries) {
-                gameplayCat.addEntry(createEntry(entry));
+                MultilineTranslationListEntry listEntry = createEntry(entry);
+                allEntries.add(listEntry);
+                gameplayCat.addEntry(listEntry);
             }
         }
 
         if (!otherEntries.isEmpty()) {
             ConfigCategory otherCat = builder.getOrCreateCategory(Component.literal("UI & Other (" + countTranslated(otherEntries) + "/" + otherEntries.size() + ")"));
             for (TranslationEntry entry : otherEntries) {
-                otherCat.addEntry(createEntry(entry));
+                MultilineTranslationListEntry listEntry = createEntry(entry);
+                allEntries.add(listEntry);
+                otherCat.addEntry(listEntry);
             }
         }
 
         if (!noiseEntries.isEmpty()) {
             ConfigCategory noiseCat = builder.getOrCreateCategory(Component.literal("Configs & Keys (" + countTranslated(noiseEntries) + "/" + noiseEntries.size() + ")"));
             for (TranslationEntry entry : noiseEntries) {
-                noiseCat.addEntry(createEntry(entry));
+                MultilineTranslationListEntry listEntry = createEntry(entry);
+                allEntries.add(listEntry);
+                noiseCat.addEntry(listEntry);
             }
         }
 
         if (!obsoleteEntries.isEmpty()) {
             ConfigCategory obsoleteCat = builder.getOrCreateCategory(Component.literal("Obsolete (" + obsoleteEntries.size() + ")"));
             for (TranslationEntry entry : obsoleteEntries) {
-                obsoleteCat.addEntry(createEntry(entry));
+                MultilineTranslationListEntry listEntry = createEntry(entry);
+                allEntries.add(listEntry);
+                obsoleteCat.addEntry(listEntry);
             }
         }
+
+        builder.setAfterInitConsumer(screen -> {
+            AbstractWidget saveButton = null;
+            for (GuiEventListener child : screen.children()) {
+                if (child instanceof AbstractWidget widget) {
+                    if (widget.getY() == screen.height - 26 && widget.getX() > screen.width / 2) {
+                        saveButton = widget;
+                        break;
+                    }
+                }
+            }
+
+            final AbstractWidget finalSaveBtn = saveButton;
+            Runnable refreshSaveTooltip = () -> updateSaveButtonWarning(finalSaveBtn, allEntries);
+
+            for (MultilineTranslationListEntry listEntry : allEntries) {
+                listEntry.setOnValueChangeListener(refreshSaveTooltip);
+            }
+
+            refreshSaveTooltip.run();
+        });
 
         builder.setSavingRunnable(() -> {
             boolean saved = TranslationStorage.saveModTranslations(targetLang, modData);
@@ -96,6 +130,34 @@ public class TranslationConfigBuilder {
         return builder.build();
     }
 
+    private static void updateSaveButtonWarning(AbstractWidget saveButton, List<MultilineTranslationListEntry> allEntries) {
+        if (saveButton == null) return;
+        int count = 0;
+        List<String> missingSamples = new ArrayList<>();
+        for (MultilineTranslationListEntry entry : allEntries) {
+            List<String> missing = entry.getMissingPlaceholders();
+            if (!missing.isEmpty()) {
+                count++;
+                for (String m : missing) {
+                    if (!missingSamples.contains(m) && missingSamples.size() < 3) {
+                        missingSamples.add(m);
+                    }
+                }
+            }
+        }
+
+        if (count > 0) {
+            String samples = String.join(", ", missingSamples);
+            Component warning = Component.literal(
+                    "§eWarning: " + count + " entry/entries have missing placeholders (" + samples + ").\n" +
+                    "§7You can still save, but this may cause in-game errors."
+            );
+            saveButton.setTooltip(Tooltip.create(warning));
+        } else {
+            saveButton.setTooltip(null);
+        }
+    }
+
     private static MultilineTranslationListEntry createEntry(TranslationEntry entry) {
         Component fieldTitle;
         if (!entry.getSourceEnglish().isEmpty() && !entry.getSourceEnglish().equalsIgnoreCase(entry.getKey())) {
@@ -106,27 +168,9 @@ public class TranslationConfigBuilder {
 
         MultilineTranslationListEntry listEntry = new MultilineTranslationListEntry(
                 fieldTitle,
-                entry.getCurrentTranslation(),
+                entry,
                 Component.translatable("text.cloth-config.reset_value"),
-                () -> entry.getSourceEnglish(),
                 newVal -> entry.setCurrentTranslation(newVal),
-                () -> {
-                    List<Component> warnings = new ArrayList<>();
-                    if (entry.isObsolete()) {
-                        warnings.add(Component.literal("§cThis key was removed or renamed in the current mod version."));
-                    }
-                    if (entry.isTooLong()) {
-                        warnings.add(Component.literal("§eText is too long for comfortable in-game editing. We recommend editing this entry directly in the JSON file."));
-                    }
-                    if (entry.hasMissingPlaceholders()) {
-                        warnings.add(Component.literal("§cMissing placeholder: " + entry.getMissingPlaceholders() + " - saving this may cause in-game errors!"));
-                    }
-
-                    if (warnings.isEmpty()) {
-                        return Optional.empty();
-                    }
-                    return Optional.of(warnings.toArray(new Component[0]));
-                },
                 false
         );
 
@@ -136,16 +180,6 @@ public class TranslationConfigBuilder {
             tags.add(entry.getSourceEnglish());
         }
         listEntry.appendSearchTags(tags);
-
-        listEntry.setCustomErrorSupplier(text -> {
-            if (text != null && (text.length() > 180 || entry.getKey().length() > 180)) {
-                return Optional.of(Component.literal("Text is too long for comfortable in-game editing. We recommend editing this entry directly in the JSON file."));
-            }
-            if (entry.hasMissingPlaceholders()) {
-                return Optional.of(Component.literal("Missing placeholder: " + entry.getMissingPlaceholders() + " - saving this may cause in-game errors!"));
-            }
-            return Optional.empty();
-        });
 
         return listEntry;
     }

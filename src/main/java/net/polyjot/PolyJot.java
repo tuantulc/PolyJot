@@ -26,6 +26,15 @@ public class PolyJot {
 
         MinecraftForge.EVENT_BUS.register(this);
 
+        // marks this mod as purely client-side so clients can join servers without it
+        ModLoadingContext.get().registerExtensionPoint(
+                net.minecraftforge.fml.IExtensionPoint.DisplayTest.class,
+                () -> new net.minecraftforge.fml.IExtensionPoint.DisplayTest(
+                        () -> net.minecraftforge.fml.IExtensionPoint.DisplayTest.IGNORESERVERONLY,
+                        (remoteVersion, isFromServer) -> true
+                )
+        );
+
         // forge mod list config button
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::registerClientConfigScreen);
     }

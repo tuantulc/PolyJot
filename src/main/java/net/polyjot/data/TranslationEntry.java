@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TranslationEntry {
-    private static final int MAX_COMFORTABLE_LENGTH = 180;
+    public static final int MAX_COMFORTABLE_LENGTH = 180;
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("%(?:\\d+\\$)?[sdf]|%\\.\\d+f|\\{\\d+\\}");
 
     private final String key;
@@ -76,9 +76,9 @@ public class TranslationEntry {
                (key != null && key.length() > MAX_COMFORTABLE_LENGTH);
     }
 
-    public List<String> getMissingPlaceholders() {
-        List<String> sourceTokens = extractPlaceholders(sourceEnglish);
-        List<String> targetTokens = extractPlaceholders(currentTranslation);
+    public static List<String> calculateMissingPlaceholders(String source, String target) {
+        List<String> sourceTokens = extractPlaceholders(source);
+        List<String> targetTokens = extractPlaceholders(target);
         List<String> missing = new ArrayList<>();
 
         for (String token : sourceTokens) {
@@ -87,6 +87,10 @@ public class TranslationEntry {
             }
         }
         return missing;
+    }
+
+    public List<String> getMissingPlaceholders() {
+        return calculateMissingPlaceholders(sourceEnglish, currentTranslation);
     }
 
     public boolean hasMissingPlaceholders() {

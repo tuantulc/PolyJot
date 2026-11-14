@@ -11,7 +11,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.polyjot.data.TranslationEntry;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -25,21 +28,60 @@ public class MultilineTranslationListEntry extends StringListEntry {
     private List<FormattedCharSequence> cachedLines = null;
     private int lastRenderWidth = -1;
 
+    private final TranslationEntry entry;
+    private Runnable onValueChange;
+
     public MultilineTranslationListEntry(
             Component fieldName,
-            String original,
+            TranslationEntry entry,
             Component resetButtonKey,
-            Supplier<String> defaultValue,
             Consumer<String> saveCallback,
-            Supplier<Optional<Component[]>> tooltipSupplier,
             boolean requiresRestart) {
-        super(fieldName, original, resetButtonKey, defaultValue, saveCallback, tooltipSupplier, requiresRestart);
+        super(fieldName, entry.getCurrentTranslation(), resetButtonKey, () -> entry.getSourceEnglish(), saveCallback, null, requiresRestart);
+        this.entry = entry;
+
+        this.setTooltipSupplier(() -> {
+            List<Component> warnings = new ArrayList<>();
+            if (this.entry.isObsolete()) {
+                warnings.add(Component.literal("§cThis key was removed or renamed in the current mod version."));
+            }
+            String currentVal = this.getValue();
+            if ((currentVal != null && currentVal.length() > TranslationEntry.MAX_COMFORTABLE_LENGTH)
+                    || (this.entry.getSourceEnglish() != null && this.entry.getSourceEnglish().length() > TranslationEntry.MAX_COMFORTABLE_LENGTH)
+                    || (this.entry.getKey() != null && this.entry.getKey().length() > TranslationEntry.MAX_COMFORTABLE_LENGTH)) {
+                warnings.add(Component.literal("§eText is too long for comfortable in-game editing. We recommend editing this entry directly in the JSON file."));
+            }
+            List<String> missing = this.getMissingPlaceholders();
+            if (!missing.isEmpty()) {
+                warnings.add(Component.literal("§cMissing placeholder: " + missing + " - saving this may cause in-game errors!"));
+            }
+
+            if (warnings.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(warnings.toArray(new Component[0]));
+        });
     }
 
-    public void setCustomErrorSupplier(Function<String, Optional<Component>> errorSupplier) {
-        if (errorSupplier != null) {
-            this.setErrorSupplier(() -> errorSupplier.apply(this.getValue()));
+    public void setOnValueChangeListener(Runnable onValueChange) {
+        this.onValueChange = onValueChange;
+        if (this.textFieldWidget != null) {
+            this.textFieldWidget.setResponder(val -> {
+                if (this.onValueChange != null) {
+                    this.onValueChange.run();
+                }
+            });
         }
+    }
+
+    public List<String> getMissingPlaceholders() {
+        if (this.entry == null) return Collections.emptyList();
+        String currentVal = this.getValue();
+        return TranslationEntry.calculateMissingPlaceholders(this.entry.getSourceEnglish(), currentVal != null ? currentVal : "");
+    }
+
+    public boolean hasMissingPlaceholders() {
+        return !getMissingPlaceholders().isEmpty();
     }
 
     @Override
