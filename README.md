@@ -1,4 +1,4 @@
-# 🌐 PolyJot — In-Game Text & Item Name Editor
+# PolyJot — In-Game Text & Item Name Editor
 
 > **Using an in-game editor to change/translate modded Items, Advancements, and Tooltips on the fly!**
 
@@ -20,14 +20,22 @@ PolyJot fixes that! It digs up the language files from every single mods and res
 
 ## So... what's in it for you? (The fun stuffs :D)
 
-- You can rename **anything into whatever you want.** Hate that an endgame weapon has a 5-paragraph edgy name? Change it to "The Spatula" in five seconds, done.
+- You can rename **anything into whatever you want.** Hate that an endgame weapon has a 5-paragraph edgy name? Change it to "Spatula Sword" in five seconds, done.
+
 - Translating a whole mod into Spanish, French, Chinese, heck, even Pirate Speak? Open PolyJot, type your translations, and play.
+
 - **You don't have to reload!** Normally in Minecraft, reloading language and resource packs locks up your game for 30 seconds while your PC fans scream as it tries to load all 28 of your Resource Packs all over. PolyJot injects text straight into memory the second you hit Save.
+
 - Copying text/translation from DeepL or Google Translate? Just right-click the text box. It cleans up newline formatting so you don't paste broken gibberish.
+
 - But hey, nobody wants to scroll past 800 config keys just to find the name of an apple. Worry not, entries are automatically split into **Gameplay** (items, blocks, entities, effects), **UI & Other**, and **Configs & Keys**.
+
 - Finished translating a mod? Hit **Export .zip**, give your pack a name, and PolyJot spits out a clean resource pack directly into your `.minecraft/resourcepacks/` folder, ready to send to your friends or pack into a modpack!
+
 - Best part is, if you edited something in, say, Spanish, and you switched your Minecraft language to English, it will **not** carry over! Each language can have their own translation! (Though, it's the bare minimum of a mod created to aid translating...)
+
 - Oop, PolyJot won't dump hundreds of empty JSON files onto your hard drive. It only creates a file when you actually edit or dump a mod—keeping your folders lightweight.
+
 - Got a whole team of translators? Get their halfway-translated pack, drop it in and hit **Dump All** in the menu to pull their translations into your local editable files and track the current progress instantly!
 
 ---
