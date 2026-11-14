@@ -1,4 +1,4 @@
-package net.languageport.data;
+package net.polyjot.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,8 +42,9 @@ public class TranslationStorage {
         }
 
         try (Reader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
-            Map<String, String> map = GSON.fromJson(reader, new TypeToken<Map<String, String>>(){}.getType());
-            return map != null ? map : Collections.emptyMap();
+            Map<String, String> map = new LinkedHashMap<>();
+            TranslationScanner.parseLangJson(reader, map);
+            return map;
         } catch (Exception e) {
             LOGGER.error("Failed to load saved translations for mod {} at {}", modId, filePath, e);
             return Collections.emptyMap();
@@ -57,13 +58,12 @@ public class TranslationStorage {
         try {
             Files.createDirectories(dir);
 
-            // Order: Gameplay first, other keys next, noise keys last
+            // sort: gameplay first, configs/keys last
             Map<String, String> gameplayKeys = new TreeMap<>();
             Map<String, String> otherKeys = new TreeMap<>();
             Map<String, String> noiseKeys = new TreeMap<>();
 
             for (TranslationEntry entry : data.getEntries().values()) {
-                // Only write keys that have translations or keep them populated
                 String val = entry.getCurrentTranslation();
                 String key = entry.getKey();
 
@@ -85,7 +85,7 @@ public class TranslationStorage {
                 GSON.toJson(orderedOutput, writer);
             }
 
-            // Sync with live_pack so Minecraft loads it natively on game launch
+            // mirror to live_pack so it loads on next launch
             try {
                 Path livePackDir = getBaseDirectory().resolve("live_pack").resolve("assets").resolve(data.getModId()).resolve("lang");
                 Files.createDirectories(livePackDir);
@@ -112,11 +112,10 @@ public class TranslationStorage {
             }
 
             try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath), StandardCharsets.UTF_8)) {
-                // 1. pack.mcmeta
                 JsonObject packMeta = new JsonObject();
                 JsonObject packObj = new JsonObject();
                 packObj.addProperty("pack_format", 15);
-                packObj.addProperty("description", "Language Port " + targetLang + " translations");
+                packObj.addProperty("description", "PolyJot " + targetLang + " translations");
                 packMeta.add("pack", packObj);
 
                 ZipEntry mcmetaEntry = new ZipEntry("pack.mcmeta");
@@ -124,7 +123,7 @@ public class TranslationStorage {
                 zos.write(GSON.toJson(packMeta).getBytes(StandardCharsets.UTF_8));
                 zos.closeEntry();
 
-                // 2. assets/<modid>/lang/<targetLang>.json for each mod with customized keys
+                // only pack modified entries
                 for (ModTranslationData modData : allMods) {
                     Map<String, String> customized = new LinkedHashMap<>();
                     for (TranslationEntry entry : modData.getEntries().values()) {

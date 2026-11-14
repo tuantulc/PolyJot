@@ -1,7 +1,7 @@
-package net.languageport.client.screen;
+package net.polyjot.client.screen;
 
-import net.languageport.data.ModTranslationData;
-import net.languageport.data.TranslationStorage;
+import net.polyjot.data.ModTranslationData;
+import net.polyjot.data.TranslationStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -40,7 +40,6 @@ public class ExportPackScreen extends Screen {
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
-        // Input Box for resource pack name
         int inputWidth = 200;
         this.nameInput = new EditBox(this.font, centerX - inputWidth / 2 - 12, centerY - 10, inputWidth, 20, Component.literal("Pack Name"));
         this.nameInput.setValue("Translations_" + this.targetLang);
@@ -49,10 +48,9 @@ public class ExportPackScreen extends Screen {
         this.addWidget(this.nameInput);
         this.setInitialFocus(this.nameInput);
 
-        // Information / Question mark button with tooltip
         Component infoTooltip = Component.literal(
                 "§6Why export to .zip?\n\n" +
-                "§7Normally, simply clicking §a'Save & Quit'§7 in the translation editor is all you need—your translations are loaded live automatically into the game!\n\n" +
+                "§7Normally, simply clicking §a'Save & Quit'§7 in the translation editor is all you need. Your translations are loaded live automatically into the game!\n\n" +
                 "§fExporting as a .zip creates a standalone resource pack in your §e'resourcepacks'§f folder, useful if you want to share your translations with friends or include them in a modpack."
         );
 
@@ -62,7 +60,6 @@ public class ExportPackScreen extends Screen {
                 .build();
         this.addRenderableWidget(infoButton);
 
-        // Action buttons: Export and Cancel
         this.exportButton = Button.builder(Component.literal("Export"), btn -> doExport())
                 .bounds(centerX - 105, centerY + 25, 100, 20)
                 .build();
@@ -92,7 +89,7 @@ public class ExportPackScreen extends Screen {
             packName = packName.substring(0, packName.length() - 4).trim();
         }
 
-        // Sanitize to valid file name characters
+        // strip illegal chars
         packName = packName.replaceAll("[^a-zA-Z0-9_\\-\\s]", "").trim();
         if (packName.isEmpty()) {
             packName = "Translations_" + this.targetLang;
@@ -108,7 +105,7 @@ public class ExportPackScreen extends Screen {
                     SystemToast.multiline(
                             Minecraft.getInstance(),
                             SystemToast.SystemToastIds.NARRATOR_TOGGLE,
-                            Component.literal("Language Port"),
+                            Component.literal("PolyJot"),
                             Component.literal("Exported to resourcepacks/" + packName + ".zip")
                     )
             );
@@ -117,7 +114,7 @@ public class ExportPackScreen extends Screen {
                     SystemToast.multiline(
                             Minecraft.getInstance(),
                             SystemToast.SystemToastIds.NARRATOR_TOGGLE,
-                            Component.literal("Language Port"),
+                            Component.literal("PolyJot"),
                             Component.literal("§cFailed to export resource pack!")
                     )
             );
@@ -128,7 +125,7 @@ public class ExportPackScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 257 || keyCode == 335) { // Enter or NumPad Enter
+        if (keyCode == 257 || keyCode == 335) { // enter
             if (this.exportButton != null && this.exportButton.active) {
                 doExport();
                 return true;

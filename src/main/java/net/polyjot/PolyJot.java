@@ -1,10 +1,9 @@
-package net.languageport;
+package net.polyjot;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -14,12 +13,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(LanguagePort.MOD_ID)
-public class LanguagePort {
-    public static final String MOD_ID = "language_port";
+@Mod(PolyJot.MOD_ID)
+public class PolyJot {
+    public static final String MOD_ID = "polyjot";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-    public LanguagePort() {
+    public PolyJot() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
@@ -27,22 +26,22 @@ public class LanguagePort {
 
         MinecraftForge.EVENT_BUS.register(this);
 
-        // Register Config Screen factory for the Forge Mods menu button
+        // forge mod list config button
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::registerClientConfigScreen);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Language Port common setup initialized.");
+        LOGGER.info("PolyJot common setup initialized.");
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
-        LOGGER.info("Language Port client setup initialized.");
+        LOGGER.info("PolyJot client setup initialized.");
     }
 
     private void registerClientConfigScreen() {
         ModLoadingContext.get().registerExtensionPoint(
                 ConfigScreenHandler.ConfigScreenFactory.class,
-                () -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parentScreen) -> new net.languageport.client.screen.ModSelectionScreen(parentScreen))
+                () -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parentScreen) -> new net.polyjot.client.screen.ModSelectionScreen(parentScreen))
         );
     }
 }

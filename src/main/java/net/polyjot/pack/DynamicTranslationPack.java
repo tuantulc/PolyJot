@@ -1,7 +1,7 @@
-package net.languageport.pack;
+package net.polyjot.pack;
 
-import net.languageport.LanguagePort;
-import net.languageport.data.TranslationStorage;
+import net.polyjot.PolyJot;
+import net.polyjot.data.TranslationStorage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Mod.EventBusSubscriber(modid = LanguagePort.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = PolyJot.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DynamicTranslationPack {
-    private static final String PACK_ID = "language_port_live_translations";
+    private static final String PACK_ID = "polyjot_live_translations";
 
     @SubscribeEvent
     public static void onAddPackFinders(AddPackFindersEvent event) {
@@ -33,21 +33,21 @@ public class DynamicTranslationPack {
                     Files.writeString(mcmeta, """
                         {
                           "pack": {
-                            "description": "Language Port live translations",
+                            "description": "PolyJot live translations",
                             "pack_format": 15
                           }
                         }
                         """);
                 }
             } catch (IOException e) {
-                LanguagePort.LOGGER.error("Failed to initialize live translation pack directory", e);
+                PolyJot.LOGGER.error("Failed to initialize live translation pack directory", e);
                 return;
             }
 
             RepositorySource source = packConsumer -> {
                 Pack pack = Pack.readMetaAndCreate(
                         PACK_ID,
-                        Component.literal("Language Port (Live Translations)"),
+                        Component.literal("PolyJot (Live Translations)"),
                         false,
                         (id) -> new PathPackResources(id, livePackDir, true),
                         PackType.CLIENT_RESOURCES,

@@ -1,6 +1,0 @@
-{
-  "key.categories.language_port": "Language Port",
-  "key.language_port.open_gui": "Open Translation Editor",
-  "command.language_port.open": "Opening Translation Editor for: %s",
-  "command.language_port.not_found": "Mod '%s' not found or has no language keys."
-}

@@ -1,4 +1,4 @@
-package net.languageport.client.screen;
+package net.polyjot.client.screen;
 
 import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.api.Tooltip;
@@ -19,6 +19,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class MultilineTranslationListEntry extends StringListEntry {
+
+    private int cachedHeight = -1;
+    private int lastCalculatedWidth = -1;
+    private List<FormattedCharSequence> cachedLines = null;
+    private int lastRenderWidth = -1;
 
     public MultilineTranslationListEntry(
             Component fieldName,
@@ -49,31 +54,57 @@ public class MultilineTranslationListEntry extends StringListEntry {
         int fieldWidth = Math.max(140, Math.min(220, (int) (entryWidth * 0.38f)));
         int availableLabelWidth = Math.max(60, entryWidth - resetBtnWidth - fieldWidth - 16);
 
+        if (this.cachedHeight > 0 && this.lastCalculatedWidth == availableLabelWidth) {
+            return this.cachedHeight;
+        }
+
         Font font = Minecraft.getInstance().font;
         List<FormattedCharSequence> lines = font.split(this.getDisplayedFieldName(), availableLabelWidth);
 
-        if (lines.size() <= 1) {
-            return 24;
-        }
+        int height = (lines.size() <= 1) ? 24 : Math.max(24, lines.size() * (font.lineHeight + 2) + 8);
+        this.cachedHeight = height;
+        this.lastCalculatedWidth = availableLabelWidth;
+        this.cachedLines = lines;
+        this.lastRenderWidth = availableLabelWidth;
+        return height;
+    }
 
-        // Each line takes (lineHeight + 2), plus top/bottom margin
-        return Math.max(24, lines.size() * (font.lineHeight + 2) + 8);
+    @Override
+    protected String stripAddText(String text) {
+        if (text == null) return "";
+        return super.stripAddText(text.replace("\r\n", " ").replace("\n", " ").replace("\r", " ").replace("\t", " "));
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 1) { // right click to paste
+            if (this.textFieldWidget.isMouseOver(mouseX, mouseY) && this.isEditable()) {
+                String clipboard = Minecraft.getInstance().keyboardHandler.getClipboard();
+                if (clipboard != null && !clipboard.isEmpty()) {
+                    String sanitized = stripAddText(clipboard);
+                    this.textFieldWidget.setFocused(true);
+                    this.textFieldWidget.setValue(sanitized);
+                    return true;
+                }
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-        // 1. Hover target & Tooltip
         if (this.isMouseInside(mouseX, mouseY, x, y, entryWidth, entryHeight)) {
             Rectangle area = this.getEntryArea(x, y, entryWidth, entryHeight);
             if (this.getParent() instanceof ClothConfigScreen.ListWidget<?> listWidget) {
                 listWidget.thisTimeTarget = new Rectangle(area.x, area.y + this.getParent().getScroll(), area.width, area.height);
             }
             this.getTooltip(mouseX, mouseY).ifPresent(comps -> {
-                this.addTooltip(Tooltip.of(new Point(mouseX, mouseY), this.wrapLinesToScreen(comps)));
+                if (comps != null && comps.length > 0) {
+                    this.addTooltip(Tooltip.of(new Point(mouseX, mouseY), this.wrapLinesToScreen(comps)));
+                }
             });
         }
 
-        // 2. Reset Button positioning & active state
         this.resetButton.active = this.isEditable()
                 && this.defaultValue != null
                 && this.defaultValue.get() != null
@@ -84,7 +115,6 @@ public class MultilineTranslationListEntry extends StringListEntry {
         this.resetButton.setY(widgetY);
         this.resetButton.setX(x + entryWidth - resetBtnWidth);
 
-        // 3. Text Field positioning & width
         int fieldWidth = Math.max(140, Math.min(220, (int) (entryWidth * 0.38f)));
         int fieldX = this.resetButton.getX() - fieldWidth - 4;
         this.textFieldWidget.setEditable(this.isEditable());
@@ -92,15 +122,20 @@ public class MultilineTranslationListEntry extends StringListEntry {
         this.textFieldWidget.setX(fieldX);
         setTextFieldWidth(this.textFieldWidget, fieldWidth);
 
-        // Update text field text color based on errors
         this.textFieldPreRender(this.textFieldWidget);
 
-        // 4. Wrap and render the label on the left
         Component displayedName = this.getDisplayedFieldName();
         int availableLabelWidth = Math.max(60, (fieldX - x) - 8);
 
         Font font = Minecraft.getInstance().font;
-        List<FormattedCharSequence> lines = font.split(displayedName, availableLabelWidth);
+        List<FormattedCharSequence> lines;
+        if (this.cachedLines != null && this.lastRenderWidth == availableLabelWidth) {
+            lines = this.cachedLines;
+        } else {
+            lines = font.split(displayedName, availableLabelWidth);
+            this.cachedLines = lines;
+            this.lastRenderWidth = availableLabelWidth;
+        }
 
         int textY = y + (entryHeight - lines.size() * (font.lineHeight + 2)) / 2;
         int textColor = this.getPreferredTextColor();
@@ -110,7 +145,6 @@ public class MultilineTranslationListEntry extends StringListEntry {
             textY += font.lineHeight + 2;
         }
 
-        // 5. Render child widgets
         this.resetButton.render(guiGraphics, mouseX, mouseY, delta);
         this.textFieldWidget.render(guiGraphics, mouseX, mouseY, delta);
     }

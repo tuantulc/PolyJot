@@ -1,4 +1,4 @@
-package net.languageport.client;
+package net.polyjot.client;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.resources.language.ClientLanguage;
@@ -30,7 +30,7 @@ public class LanguageHotReloader {
 
             boolean isRtl = currentLang.isDefaultRightToLeft();
 
-            // Try to create ClientLanguage instance via constructor
+            // try injecting into client language first
             try {
                 Constructor<ClientLanguage> constructor = ClientLanguage.class.getDeclaredConstructor(Map.class, boolean.class);
                 constructor.setAccessible(true);
@@ -42,7 +42,7 @@ public class LanguageHotReloader {
                 LOGGER.warn("Reflection instantiation of ClientLanguage failed, using fallback Language wrapper", reflectionEx);
             }
 
-            // Fallback wrapper if reflection fails
+            // fallback or smth
             final ImmutableMap<String, String> immutableStorage = ImmutableMap.copyOf(mergedData);
             Language customLang = new Language() {
                 @Override

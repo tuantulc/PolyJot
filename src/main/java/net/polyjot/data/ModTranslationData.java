@@ -1,4 +1,4 @@
-package net.languageport.data;
+package net.polyjot.data;
 
 import java.util.*;
 
@@ -82,7 +82,6 @@ public class ModTranslationData {
                 continue;
             }
 
-            // Mode filter
             switch (mode) {
                 case UNTRANSLATED -> {
                     if (!entry.isUntranslated()) continue;
@@ -99,7 +98,6 @@ public class ModTranslationData {
                 case ALL -> {}
             }
 
-            // Text query filter
             if (!lowerQuery.isEmpty()) {
                 boolean matchesKey = entry.getKey().toLowerCase(Locale.ROOT).contains(lowerQuery);
                 boolean matchesSource = entry.getSourceEnglish().toLowerCase(Locale.ROOT).contains(lowerQuery);

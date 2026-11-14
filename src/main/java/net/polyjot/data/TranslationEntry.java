@@ -1,4 +1,4 @@
-package net.languageport.data;
+package net.polyjot.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +67,7 @@ public class TranslationEntry {
     }
 
     public boolean isUntranslated() {
-        return !customized || currentTranslation.isEmpty() || currentTranslation.equals(sourceEnglish);
+        return currentTranslation == null || currentTranslation.isEmpty() || currentTranslation.equals(sourceEnglish);
     }
 
     public boolean isTooLong() {

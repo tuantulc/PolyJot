@@ -1,0 +1,6 @@
+{
+  "key.categories.polyjot": "PolyJot",
+  "key.polyjot.open_gui": "Open Translation Editor",
+  "command.polyjot.open": "Opening Translation Editor for: %s",
+  "command.polyjot.not_found": "Mod '%s' not found or has no language keys."
+}
