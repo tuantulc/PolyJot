@@ -1,4 +1,4 @@
-# PolyJot — In-Game Text & Item Name Editor
+# PolyJot: In-Game Text & Item Name Editor
 
 > **Using an in-game editor to change/translate modded Items, Advancements, and Tooltips on the fly!**
 
@@ -18,15 +18,16 @@ PolyJot fixes that! It digs up the language files from every single mods and res
 
 ---
 
-## So... what's in it for you? (The fun stuffs :D)
+## So... what's in it for you?
+
+<details>
+<summary><b>The fun stuffs :D</b></summary>
 
 - You can rename **anything into whatever you want.** Hate that an endgame weapon has a 5-paragraph edgy name? Change it to "Spatula Sword" in five seconds, done.
 
 - Translating a whole mod into Spanish, French, Chinese, heck, even Pirate Speak? Open PolyJot, type your translations, and play.
 
 - **You don't have to reload!** Normally in Minecraft, reloading language and resource packs locks up your game for 30 seconds while your PC fans scream as it tries to load all 28 of your Resource Packs all over. PolyJot injects text straight into memory the second you hit Save.
-
-- Copying text/translation from DeepL or Google Translate? Just right-click the text box. It cleans up newline formatting so you don't paste broken gibberish.
 
 - But hey, nobody wants to scroll past 800 config keys just to find the name of an apple. Worry not, entries are automatically split into **Gameplay** (items, blocks, entities, effects), **UI & Other**, and **Configs & Keys**.
 
@@ -38,29 +39,26 @@ PolyJot fixes that! It digs up the language files from every single mods and res
 
 - Got a whole team of translators? Get their halfway-translated pack, drop it in and hit **Dump All** in the menu to pull their translations into your local editable files and track the current progress instantly!
 
----
+</details>
 
 ## How to use? (Takes like 10 seconds, I swear)
 
-0. **(If you're trying to translate a mod to your language):** Change your Minecraft language to the target language.
-1. **Open the menu:**
-   - Type `/polyjot` in chat, or go to `Mods` $\rightarrow$ find **PolyJot** $\rightarrow$ click **Config**.
-   - *(Optional)* You can also set a dedicated keybind in your Minecraft controls.
-2. **Pick a mod!** Use the search bar to find any mod by name or Mod ID, then click **Translate**.
-3. **Now you're in the editor.** Type whatever you want in the box on the right.
-4. **Hit Save & Quit,** then peek your inventory/Achievement page/whatever you changed. The new name is already there!
+1.  **(If you're trying to translate a mod to your language):** Change your Minecraft language to the target language.
+2.  **Open the menu:**
+    *   Type `/polyjot` in chat, or go to `Mods` -> find **PolyJot** -> click **Config**.
+    *   _(Optional)_ You can also set a dedicated keybind in your Minecraft controls.
+3.  **Pick a mod!** Use the search bar to find any mod by name or Mod ID, then click **Translate**.
+4.  **Now you're in the editor.** Type whatever you want in the box on the right.
+5.  **Hit Save & Quit,** then peek your inventory/Achievement page/whatever you changed. The new name is already there!
 
 ![Wow, how quick and easy](docs/images/showcase.gif)
 
-
 **Note:** If you're a Server Owner or Modpack creator, you should click **Export .zip** and get the pack from your `.minecraft/resourcepacks/` folder. You can now send it to others or upload it to your Server/Modpack.
 
----
-
-## Wanna look under the hood? Here are extra info for Modders & Pack makers.
+## Some extra info for Modders & Pack makers.
 
 <details>
-<summary><b>How does it work, exactly?</b></summary>
+<summary><b>Looking under the hood...</b></summary>
 
 PolyJot uses Forge's `IModFile.findResource()` directly on disk to scan `assets/<modId>/lang/en_us.json` straight from the mod JAR. It also discovers sub-namespaces within multi-module mod JARs, then uses `JsonParser.parseReader()` streaming to tolerate duplicate keys, trailing commas, and formatting quirks without throwing `JsonSyntaxException`.
 
@@ -72,7 +70,7 @@ Saved translations live in `.minecraft/translations/<language>/<modId>.json`. It
 Your edits persist across restarts without needing to export a manual `.zip`.
 
 O(1) Scroll Caching? 🤔
-Cloth Config screens with 1,000+ entries (like *Apotheosis* or *Alex's Caves*) can lag due to repetitive font measurement and glyph splitting. PolyJot caches line heights and split text ($O(1)$ lookup during scrolling), maintaining smooth navigation even on monstrous language files. Though, it's not foolproof...
+Cloth Config screens with 1,000+ entries (like *Apotheosis* or *Alex's Caves*) can lag due to repetitive font measurement and glyph splitting. PolyJot caches line heights and split text (O(1) lookup during scrolling), maintaining smooth navigation even on monstrous language files. Though, it's not foolproof...
 
 </details>
 
