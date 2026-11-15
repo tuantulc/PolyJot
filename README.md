@@ -67,14 +67,16 @@ O(1) Scroll Caching? 🤔 Cloth Config screens with 1,000+ entries (like _Apothe
 
 </details>
 
+## Requirements
+
 - **Minecraft:** Forge `1.20.1` (For now)
 - **Required Dependency:** [![Cloth Config](<https://img.shields.io/badge/Requires-Cloth Config API-blue.svg>)](https://curseforge.com/minecraft/mc-mods/cloth-config) (`11.1.136+`)
 
 ## Known Issues
 
-*   Sometimes the search bar for Mods can act up and not give results. (Will fix soon enough)
-*   Accessing heavy JSON files can cause pretty big performance issues. (The biggest limitations are my knowledge, I still haven't found a way to fix this yet)
-*   If your edited text doesn't display after restarting the game, try pressing `Export .zip` and enabling the Resource Pack.
+- Sometimes the search bar for Mods can act up and not give results. (Will fix soon enough)
+- Accessing heavy JSON files can cause pretty big performance issues. (The biggest limitations are my knowledge, I still haven't found a way to fix this yet)
+- If your edited text doesn't display after restarting the game, try pressing `Export .zip` and enabling the Resource Pack.
 
 ## License
 
