@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+}
+
+base {
+    archivesName = "${mod_id}-common"
+}
+
+// Common sources and resources are compiled directly into the loader subprojects (:forge, :fabric)
+// with their respective loader toolchains and Minecraft mappings.
+compileJava.enabled = false
+processResources.enabled = false
+jar.enabled = false

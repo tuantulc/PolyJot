@@ -5,5 +5,15 @@ pluginManagement {
             name = 'MinecraftForge'
             url = 'https://maven.minecraftforge.net/'
         }
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
     }
 }
+
+rootProject.name = 'PolyJot'
+
+include 'common'
+include 'forge'
+include 'fabric'
