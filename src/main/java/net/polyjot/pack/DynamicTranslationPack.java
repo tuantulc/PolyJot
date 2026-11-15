@@ -48,7 +48,7 @@ public class DynamicTranslationPack {
                 Pack pack = Pack.readMetaAndCreate(
                         PACK_ID,
                         Component.literal("PolyJot (Live Translations)"),
-                        false,
+                        true,
                         (id) -> new PathPackResources(id, livePackDir, true),
                         PackType.CLIENT_RESOURCES,
                         Pack.Position.TOP,
