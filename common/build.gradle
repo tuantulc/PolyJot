@@ -13,3 +13,11 @@ base {
 compileJava.enabled = false
 processResources.enabled = false
 jar.enabled = false
+
+dependencies {
+    compileOnly fileTree(dir: "${rootProject.projectDir}/.gradle/loom-cache/minecraftMaven", include: ['**/*.jar'])
+    compileOnly fileTree(dir: "${rootProject.projectDir}/.gradle/loom-cache/remapped_mods", include: ['**/*.jar'], exclude: ['**/*sources.jar'])
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.20.0'
+    compileOnly 'com.google.code.gson:gson:2.10.1'
+    compileOnly 'com.google.guava:guava:31.1-jre'
+}
