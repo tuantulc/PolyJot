@@ -51,7 +51,7 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
-        var commandHandler = Commands.literal("lang")
+        var commandHandler = Commands.literal("polyjot")
                 .executes(ctx -> {
                     Minecraft.getInstance().tell(() -> {
                         Minecraft.getInstance().setScreen(new ModSelectionScreen(null));
@@ -104,7 +104,5 @@ public class ClientEvents {
                 );
 
         event.getDispatcher().register(commandHandler);
-        // Also register /polyjot alias
-        event.getDispatcher().register(Commands.literal("polyjot").redirect(event.getDispatcher().register(commandHandler)));
     }
 }

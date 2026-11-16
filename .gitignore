@@ -4,6 +4,7 @@ out/
 bin/
 
 run/
+run-data/
 *.log
 logs/
 crash-reports/
@@ -21,5 +22,6 @@ crash-reports/
 .DS_Store
 Thumbs.db
 
+*.class
 *.jar
 !gradle/wrapper/*.jar

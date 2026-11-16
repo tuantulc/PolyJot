@@ -31,11 +31,7 @@ public class PolyJotFabric implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         PolyJotConstants.LOGGER.info("PolyJot Fabric Client Initializer starting...");
-
-        // Register keymapping
         KeyBindingHelper.registerKeyBinding(OPEN_GUI_KEY);
-
-        // Register client tick event for keypress
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null) {
                 while (OPEN_GUI_KEY.consumeClick()) {
@@ -44,9 +40,8 @@ public class PolyJotFabric implements ClientModInitializer {
             }
         });
 
-        // Register client commands (/lang and /polyjot)
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            var commandHandler = ClientCommandManager.literal("lang")
+            var commandHandler = ClientCommandManager.literal("polyjot")
                     .executes(ctx -> {
                         Minecraft.getInstance().tell(() -> {
                             Minecraft.getInstance().setScreen(new ModSelectionScreen(null));
@@ -103,7 +98,6 @@ public class PolyJotFabric implements ClientModInitializer {
                     );
 
             dispatcher.register(commandHandler);
-            dispatcher.register(ClientCommandManager.literal("polyjot").redirect(dispatcher.register(commandHandler)));
         });
 
         PolyJotConstants.LOGGER.info("PolyJot Fabric Client initialized successfully.");
