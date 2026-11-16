@@ -41,6 +41,8 @@ _(This mod was made to edit **other mods**! If you want to change Vanilla texts,
 
 ## How to use? (Takes like 10 seconds, trust me)
 
+<img src="docs/images/showcase.gif" width="40%" alt="See this? Took me 8 seconds">
+
 1.  **(If you're trying to translate a mod to your language):** Change your Minecraft language to the target language.
 2.  **Open the menu:**
     - Type `/polyjot` or `/lang` in chat, or go to `Mods` -> find **PolyJot** -> click **Config**.
@@ -49,7 +51,7 @@ _(This mod was made to edit **other mods**! If you want to change Vanilla texts,
 4.  **Now you're in the editor.** Type whatever you want in the box on the right.
 5.  **Hit Save & Quit,** then peek at your inventory/Achievement page/whatever you changed. The new name is already there!
 
-![Wow, how quick and easy](docs/images/showcase.gif)
+[![Quick preview I guess](docs/images/tempthumbnail.png)](https://www.youtube.com/watch?v=qceXkyMJHBU)
 
 **Note:** If you're a Server Owner or Modpack creator, you should click **Export .zip** and get the pack from your `.minecraft/resourcepacks/` folder. You can now send it to others or upload it to your Server/Modpack.
 
@@ -69,7 +71,7 @@ O(1) Scroll Caching? 🤔 Cloth Config screens with 1,000+ entries (like _Apothe
 
 ## Requirements
 
-- **Minecraft:** Forge `1.20.1` (For now)
+- **Minecraft:** Forge/Fabric `1.20.1` (For now)
 - **Required Dependency:** [![Cloth Config](<https://img.shields.io/badge/Requires-Cloth Config API-blue.svg>)](https://curseforge.com/minecraft/mc-mods/cloth-config) (`11.1.136+`)
 
 ## Known Issues

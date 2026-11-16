@@ -1,0 +1,46 @@
+plugins {
+    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'maven-publish'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = "${mod_id}-fabric"
+}
+
+// Include common sources and resources directly into Fabric build
+sourceSets.main.java.srcDir project(':common').file('src/main/java')
+sourceSets.main.resources.srcDir project(':common').file('src/main/resources')
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+
+    // Fabric API
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+    // Cloth Config
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}"
+
+    // ModMenu (optional)
+    modCompileOnly "com.terraformersmc:modmenu:7.2.2"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "mod_version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 17
+}
+
+java {
+    withSourcesJar()
+}

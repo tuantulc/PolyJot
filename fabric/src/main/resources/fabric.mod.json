@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "polyjot",
+  "version": "${mod_version}",
+  "name": "PolyJot \u2014 In-Game Text & Item Name Editor",
+  "description": "In-game text and item name editor for Minecraft 1.20.1.",
+  "authors": [
+    "Forkeve"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/polyjot/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.polyjot.fabric.PolyJotFabric"
+    ],
+    "modmenu": [
+      "net.polyjot.fabric.compat.PolyJotModMenuCompat"
+    ]
+  },
+  "mixins": [
+    "polyjot.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "minecraft": "1.20.1",
+    "java": ">=17",
+    "fabric-api": "*",
+    "cloth-config": ">=11.0.0"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
