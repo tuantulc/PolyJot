@@ -25,16 +25,19 @@ public class ModSelectionScreen extends Screen {
     private Map<String, ModTranslationData> allMods = new LinkedHashMap<>();
 
     private EditBox searchBox;
+    private Button sortBtn;
     private ModListWidget modListWidget;
 
+    private static SortMode currentSort = SortMode.NAME_ASC;
+
     public ModSelectionScreen(Screen parentScreen) {
-        super(Component.literal("Translation Manager"));
+        super(Component.translatable("gui.polyjot.title"));
         this.parentScreen = parentScreen;
         this.targetLang = Minecraft.getInstance().options.languageCode;
     }
 
     public ModSelectionScreen(Screen parentScreen, String targetLang) {
-        super(Component.literal("Translation Manager"));
+        super(Component.translatable("gui.polyjot.title"));
         this.parentScreen = parentScreen;
         this.targetLang = targetLang;
     }
@@ -52,40 +55,54 @@ public class ModSelectionScreen extends Screen {
         int listWidth = Math.min(this.width - 50, 440);
         int startX = this.width / 2 - listWidth / 2;
 
+        int sortBtnWidth = 20;
         int folderBtnWidth = 75;
         int exportBtnWidth = 70;
         int dumpBtnWidth = 65;
         int gap = 4;
-        int searchWidth = listWidth - folderBtnWidth - exportBtnWidth - dumpBtnWidth - (gap * 3);
+        int searchWidth = listWidth - sortBtnWidth - folderBtnWidth - exportBtnWidth - dumpBtnWidth - (gap * 4);
 
-        this.searchBox = new EditBox(this.font, startX, 22, searchWidth, 20, Component.literal("Search Mods"));
-        this.searchBox.setHint(Component.literal("Search mods...").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        this.searchBox = new EditBox(this.font, startX, 22, searchWidth, 20, Component.translatable("gui.polyjot.search_mods"));
+        this.searchBox.setHint(Component.translatable("gui.polyjot.search_mods_hint").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
         this.searchBox.setResponder(this::onSearchChanged);
         this.addWidget(this.searchBox);
         if (!prevQuery.isEmpty()) {
             this.searchBox.setValue(prevQuery);
         }
 
-        int folderBtnX = startX + searchWidth + gap;
-        this.addRenderableWidget(Button.builder(Component.literal("Open Folder"), btn -> {
+        int sortBtnX = startX + searchWidth + gap;
+        this.sortBtn = Button.builder(Component.literal("⇅"), btn -> {
+            currentSort = currentSort.next();
+            updateSortButton();
+            populateList(this.searchBox != null ? this.searchBox.getValue() : "");
+        }).bounds(sortBtnX, 22, sortBtnWidth, 20).build();
+        updateSortButton();
+        this.addRenderableWidget(this.sortBtn);
+
+        int folderBtnX = sortBtnX + sortBtnWidth + gap;
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.polyjot.open_folder"), btn -> {
             Path folder = TranslationStorage.getLanguageDirectory(targetLang);
             try {
                 Files.createDirectories(folder);
                 Util.getPlatform().openFile(folder.toFile());
             } catch (Exception ignored) {
             }
-        }).bounds(folderBtnX, 22, folderBtnWidth, 20).build());
+        }).bounds(folderBtnX, 22, folderBtnWidth, 20)
+        .tooltip(Tooltip.create(Component.translatable("gui.polyjot.open_folder.tooltip")))
+        .build());
 
         int exportBtnX = folderBtnX + folderBtnWidth + gap;
-        this.addRenderableWidget(Button.builder(Component.literal("Export .zip"), btn -> {
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.polyjot.export_zip"), btn -> {
             Minecraft.getInstance().setScreen(new ExportPackScreen(this, this.targetLang, this.allMods.values()));
-        }).bounds(exportBtnX, 22, exportBtnWidth, 20).build());
+        }).bounds(exportBtnX, 22, exportBtnWidth, 20)
+        .tooltip(Tooltip.create(Component.translatable("gui.polyjot.export_zip.tooltip")))
+        .build());
 
         int dumpBtnX = exportBtnX + exportBtnWidth + gap;
-        Button dumpBtn = Button.builder(Component.literal("Dump All"), btn -> {
+        Button dumpBtn = Button.builder(Component.translatable("gui.polyjot.dump_missing"), btn -> {
             Minecraft.getInstance().setScreen(new DumpAllTranslationsScreen(this, this.targetLang, this.allMods.values()));
         }).bounds(dumpBtnX, 22, dumpBtnWidth, 20)
-        .tooltip(Tooltip.create(Component.literal("§6Sync & Create All JSON Files\n§7Generate local editable files for all loaded mods in translations/" + targetLang + "/.")))
+        .tooltip(Tooltip.create(Component.translatable("gui.polyjot.dump_missing.tooltip")))
         .build();
         this.addRenderableWidget(dumpBtn);
 
@@ -98,6 +115,14 @@ public class ModSelectionScreen extends Screen {
         }).bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
     }
 
+    private void updateSortButton() {
+        if (this.sortBtn != null) {
+            this.sortBtn.setTooltip(Tooltip.create(
+                    Component.translatable("gui.polyjot.sort_tooltip", currentSort.getDisplayName())
+            ));
+        }
+    }
+
     private void onSearchChanged(String query) {
         populateList(query);
     }
@@ -106,6 +131,7 @@ public class ModSelectionScreen extends Screen {
         this.modListWidget.clearEntries();
         String lowerQuery = query.trim().toLowerCase(Locale.ROOT);
 
+        List<ModTranslationData> filtered = new ArrayList<>();
         for (ModTranslationData modData : allMods.values()) {
             if (!lowerQuery.isEmpty()) {
                 boolean matchesName = modData.getDisplayName().toLowerCase(Locale.ROOT).contains(lowerQuery);
@@ -114,18 +140,27 @@ public class ModSelectionScreen extends Screen {
                     continue;
                 }
             }
+            filtered.add(modData);
+        }
 
+        filtered.sort(currentSort.getComparator());
+
+        for (ModTranslationData modData : filtered) {
             this.modListWidget.addModEntry(new ModEntry(this, modData));
         }
         this.modListWidget.setScrollAmount(0);
     }
 
     public void refreshModList() {
+        double scroll = this.modListWidget != null ? this.modListWidget.getScrollAmount() : 0;
         this.allMods = TranslationScanner.scanAllMods(this.targetLang);
         if (this.searchBox != null) {
             populateList(this.searchBox.getValue());
         } else {
             populateList("");
+        }
+        if (this.modListWidget != null) {
+            this.modListWidget.setScrollAmount(scroll);
         }
     }
 
@@ -160,7 +195,8 @@ public class ModSelectionScreen extends Screen {
         this.modListWidget.render(guiGraphics, mouseX, mouseY, partialTick);
         this.searchBox.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, "Translation Manager (" + targetLang + ")", this.width / 2, 8, 0xFFFFFF);
+        Component title = Component.translatable("gui.polyjot.title").append(" (" + targetLang + ")");
+        guiGraphics.drawCenteredString(this.font, title, this.width / 2, 8, 0xFFFFFF);
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
@@ -168,6 +204,52 @@ public class ModSelectionScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.parentScreen);
+    }
+
+    public enum SortMode {
+        NAME_ASC(Component.translatable("gui.polyjot.sort.name_asc"),
+                Comparator.comparing(ModTranslationData::getDisplayName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(ModTranslationData::getModId)),
+        NAME_DESC(Component.translatable("gui.polyjot.sort.name_desc"),
+                Comparator.comparing(ModTranslationData::getDisplayName, String.CASE_INSENSITIVE_ORDER).reversed()
+                        .thenComparing(ModTranslationData::getModId)),
+        PROGRESS_DESC(Component.translatable("gui.polyjot.sort.progress_desc"),
+                Comparator.comparingDouble(ModTranslationData::getCompletionPercentage).reversed()
+                        .thenComparing(ModTranslationData::getDisplayName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(ModTranslationData::getModId)),
+        PROGRESS_ASC(Component.translatable("gui.polyjot.sort.progress_asc"),
+                Comparator.comparingDouble(ModTranslationData::getCompletionPercentage)
+                        .thenComparing(ModTranslationData::getDisplayName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(ModTranslationData::getModId)),
+        SIZE_DESC(Component.translatable("gui.polyjot.sort.size_desc"),
+                Comparator.comparingInt(ModTranslationData::getTotalCount).reversed()
+                        .thenComparing(ModTranslationData::getDisplayName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(ModTranslationData::getModId)),
+        SIZE_ASC(Component.translatable("gui.polyjot.sort.size_asc"),
+                Comparator.comparingInt(ModTranslationData::getTotalCount)
+                        .thenComparing(ModTranslationData::getDisplayName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(ModTranslationData::getModId));
+
+        private final Component displayName;
+        private final Comparator<ModTranslationData> comparator;
+
+        SortMode(Component displayName, Comparator<ModTranslationData> comparator) {
+            this.displayName = displayName;
+            this.comparator = comparator;
+        }
+
+        public Component getDisplayName() {
+            return this.displayName;
+        }
+
+        public Comparator<ModTranslationData> getComparator() {
+            return this.comparator;
+        }
+
+        public SortMode next() {
+            SortMode[] values = values();
+            return values[(this.ordinal() + 1) % values.length];
+        }
     }
 
     public static class ModListWidget extends ObjectSelectionList<ModEntry> {
@@ -207,19 +289,18 @@ public class ModSelectionScreen extends Screen {
 
             // dump just this mod
             boolean alreadyDumped = Files.exists(TranslationStorage.getModFilePath(screen.targetLang, modData.getModId()));
-            this.dumpButton = Button.builder(Component.literal(alreadyDumped ? "Dumped" : "Dump"), btn -> {
+            this.dumpButton = Button.builder(alreadyDumped ? Component.translatable("gui.polyjot.dumped") : Component.translatable("gui.polyjot.dump"), btn -> {
                 boolean saved = TranslationStorage.saveModTranslations(screen.targetLang, modData);
                 if (saved) {
                     btn.active = false;
-                    btn.setMessage(Component.literal("Dumped"));
-                    btn.setTooltip(Tooltip.create(Component.literal("Dumped into translations/" + screen.targetLang + "/" + modData.getModId() + ".json")));
-                    screen.refreshModList();
+                    btn.setMessage(Component.translatable("gui.polyjot.dumped"));
+                    btn.setTooltip(Tooltip.create(Component.translatable("gui.polyjot.dump.tooltip_dumped", screen.targetLang, modData.getModId())));
                     Minecraft.getInstance().getToasts().addToast(
                             SystemToast.multiline(
                                     Minecraft.getInstance(),
                                     SystemToast.SystemToastIds.NARRATOR_TOGGLE,
-                                    Component.literal("PolyJot"),
-                                    Component.literal("Dumped JSON for " + modData.getDisplayName())
+                                    Component.translatable("polyjot.name"),
+                                    Component.translatable("toast.polyjot.dump_mod", modData.getDisplayName())
                             )
                     );
                 }
@@ -227,23 +308,21 @@ public class ModSelectionScreen extends Screen {
 
             if (alreadyDumped) {
                 this.dumpButton.active = false;
-                this.dumpButton.setTooltip(Tooltip.create(Component.literal("Already dumped into translations/" + screen.targetLang + "/" + modData.getModId() + ".json")));
+                this.dumpButton.setTooltip(Tooltip.create(Component.translatable("gui.polyjot.dump.tooltip_already", screen.targetLang, modData.getModId())));
             } else {
-                this.dumpButton.setTooltip(Tooltip.create(Component.literal("Generate translations/" + screen.targetLang + "/" + modData.getModId() + ".json for manual editing.")));
+                this.dumpButton.setTooltip(Tooltip.create(Component.translatable("gui.polyjot.dump.tooltip_generate", screen.targetLang, modData.getModId())));
             }
 
             // warn on huge mods to avoid cloth lag
-            Button.Builder editBuilder = Button.builder(Component.literal("Translate"), btn -> {
+            Button.Builder editBuilder = Button.builder(Component.translatable("gui.polyjot.translate"), btn -> {
                 Screen editorScreen = TranslationConfigBuilder.createScreen(screen, modData, screen.targetLang);
                 Minecraft.getInstance().setScreen(editorScreen);
             }).bounds(0, 0, 68, 20);
 
-            if (modData.getTotalCount() >= 500) {
-                editBuilder.tooltip(Tooltip.create(Component.literal(
-                        "§eWarning: This mod has " + modData.getTotalCount() + " entries.\n" +
-                        "§7Editing very large mods in-game may cause performance lag.\n" +
-                        "§fUsing the Dump button and editing the JSON file directly is recommended."
-                )));
+            if ("polyjot".equals(modData.getModId())) {
+                editBuilder.tooltip(Tooltip.create(Component.translatable("gui.polyjot.easter_egg")));
+            } else if (modData.getTotalCount() >= 500) {
+                editBuilder.tooltip(Tooltip.create(Component.translatable("gui.polyjot.large_mod_warning", modData.getTotalCount())));
             }
             this.editButton = editBuilder.build();
         }

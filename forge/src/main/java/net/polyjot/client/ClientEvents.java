@@ -53,11 +53,15 @@ public class ClientEvents {
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
         var commandHandler = Commands.literal("polyjot")
                 .executes(ctx -> {
-                    Minecraft.getInstance().tell(() -> {
-                        Minecraft.getInstance().setScreen(new ModSelectionScreen(null));
-                    });
+                    PolyJotCommands.openModSelection();
                     return 1;
                 })
+                .then(Commands.literal("hand")
+                        .executes(ctx -> {
+                            PolyJotCommands.openHandItemEdit();
+                            return 1;
+                        })
+                )
                 .then(Commands.literal("edit")
                         .then(Commands.argument("modid", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {
@@ -70,34 +74,7 @@ public class ClientEvents {
                                 })
                                 .executes(ctx -> {
                                     String modId = StringArgumentType.getString(ctx, "modid");
-                                    Minecraft.getInstance().tell(() -> {
-                                        String targetLang = Minecraft.getInstance().options.languageCode;
-                                        DiscoveredMod modInfo = Services.PLATFORM.getMod(modId);
-
-                                        if (modInfo == null) {
-                                            Minecraft.getInstance().player.displayClientMessage(
-                                                    Component.literal("§c[PolyJot] Mod '" + modId + "' not found!"), false
-                                            );
-                                            return;
-                                        }
-
-                                        ModTranslationData data = TranslationScanner.scanMod(
-                                                Minecraft.getInstance().getResourceManager(),
-                                                modInfo.getModId(),
-                                                modInfo.getDisplayName(),
-                                                targetLang
-                                        );
-
-                                        if (data == null || data.getTotalCount() == 0) {
-                                            Minecraft.getInstance().player.displayClientMessage(
-                                                    Component.literal("§e[PolyJot] Mod '" + modInfo.getDisplayName() + "' has no language keys."), false
-                                            );
-                                            return;
-                                        }
-
-                                        Screen screen = TranslationConfigBuilder.createScreen(null, data, targetLang);
-                                        Minecraft.getInstance().setScreen(screen);
-                                    });
+                                    PolyJotCommands.openModEdit(modId);
                                     return 1;
                                 })
                         )

@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.polyjot.PolyJotConstants;
+import net.polyjot.client.PolyJotCommands;
 import net.polyjot.client.screen.ModSelectionScreen;
 import net.polyjot.client.screen.TranslationConfigBuilder;
 import net.polyjot.data.ModTranslationData;
@@ -43,11 +44,15 @@ public class PolyJotFabric implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             var commandHandler = ClientCommandManager.literal("polyjot")
                     .executes(ctx -> {
-                        Minecraft.getInstance().tell(() -> {
-                            Minecraft.getInstance().setScreen(new ModSelectionScreen(null));
-                        });
+                        PolyJotCommands.openModSelection();
                         return 1;
                     })
+                    .then(ClientCommandManager.literal("hand")
+                            .executes(ctx -> {
+                                PolyJotCommands.openHandItemEdit();
+                                return 1;
+                            })
+                    )
                     .then(ClientCommandManager.literal("edit")
                             .then(ClientCommandManager.argument("modid", StringArgumentType.word())
                                     .suggests((ctx, builder) -> {
@@ -60,38 +65,7 @@ public class PolyJotFabric implements ClientModInitializer {
                                     })
                                     .executes(ctx -> {
                                         String modId = StringArgumentType.getString(ctx, "modid");
-                                        Minecraft.getInstance().tell(() -> {
-                                            String targetLang = Minecraft.getInstance().options.languageCode;
-                                            DiscoveredMod modInfo = Services.PLATFORM.getMod(modId);
-
-                                            if (modInfo == null) {
-                                                if (Minecraft.getInstance().player != null) {
-                                                    Minecraft.getInstance().player.displayClientMessage(
-                                                            Component.literal("§c[PolyJot] Mod '" + modId + "' not found!"), false
-                                                    );
-                                                }
-                                                return;
-                                            }
-
-                                            ModTranslationData data = TranslationScanner.scanMod(
-                                                    Minecraft.getInstance().getResourceManager(),
-                                                    modInfo.getModId(),
-                                                    modInfo.getDisplayName(),
-                                                    targetLang
-                                            );
-
-                                            if (data == null || data.getTotalCount() == 0) {
-                                                if (Minecraft.getInstance().player != null) {
-                                                    Minecraft.getInstance().player.displayClientMessage(
-                                                            Component.literal("§e[PolyJot] Mod '" + modInfo.getDisplayName() + "' has no language keys."), false
-                                                    );
-                                                }
-                                                return;
-                                            }
-
-                                            Screen screen = TranslationConfigBuilder.createScreen(null, data, targetLang);
-                                            Minecraft.getInstance().setScreen(screen);
-                                        });
+                                        PolyJotCommands.openModEdit(modId);
                                         return 1;
                                     })
                             )

@@ -70,6 +70,13 @@ public class TranslationScanner {
             String key = entry.getKey();
             String engVal = entry.getValue();
 
+            String originalVal;
+            if (shippedTarget.containsKey(key)) {
+                originalVal = shippedTarget.get(key);
+            } else {
+                originalVal = engVal;
+            }
+
             String activeTranslation;
             boolean isCustomized;
 
@@ -84,7 +91,7 @@ public class TranslationScanner {
                 isCustomized = false;
             }
 
-            TranslationEntry transEntry = new TranslationEntry(key, engVal, activeTranslation, isCustomized);
+            TranslationEntry transEntry = new TranslationEntry(key, engVal, originalVal, activeTranslation, isCustomized);
             data.addEntry(transEntry);
         }
 
@@ -92,7 +99,7 @@ public class TranslationScanner {
         for (Map.Entry<String, String> savedEntry : savedCustom.entrySet()) {
             String savedKey = savedEntry.getKey();
             if (!englishSource.containsKey(savedKey)) {
-                TranslationEntry obsoleteEntry = new TranslationEntry(savedKey, "", savedEntry.getValue(), true);
+                TranslationEntry obsoleteEntry = new TranslationEntry(savedKey, "", "", savedEntry.getValue(), true);
                 obsoleteEntry.setObsolete(true);
                 data.addEntry(obsoleteEntry);
             }
@@ -117,6 +124,9 @@ public class TranslationScanner {
                 }
             }
             for (Resource res : resources) {
+                if ("polyjot_live_translations".equals(res.sourcePackId())) {
+                    continue;
+                }
                 try (Reader reader = new InputStreamReader(res.open(), StandardCharsets.UTF_8)) {
                     parseLangJson(reader, merged);
                 } catch (Exception e) {

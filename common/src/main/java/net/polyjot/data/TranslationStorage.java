@@ -63,7 +63,7 @@ public class TranslationStorage {
             Map<String, String> noiseKeys = new TreeMap<>();
 
             for (TranslationEntry entry : data.getEntries().values()) {
-                String val = entry.getCurrentTranslation();
+                String val = TranslationEntry.translateColorCodes(entry.getCurrentTranslation());
                 String key = entry.getKey();
 
                 if (ModTranslationData.isNoiseKey(key)) {
