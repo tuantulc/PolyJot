@@ -45,7 +45,7 @@ public class ExportPackScreen extends Screen {
         this.nameInput.setValue("Translations_" + this.targetLang);
         this.nameInput.setMaxLength(64);
         this.nameInput.setResponder(text -> updateExportButtonState());
-        this.addWidget(this.nameInput);
+        this.addRenderableWidget(this.nameInput);
         this.setInitialFocus(this.nameInput);
 
         Component infoTooltip = Component.literal(
@@ -104,7 +104,7 @@ public class ExportPackScreen extends Screen {
             Minecraft.getInstance().getToasts().addToast(
                     SystemToast.multiline(
                             Minecraft.getInstance(),
-                            SystemToast.SystemToastIds.NARRATOR_TOGGLE,
+                            SystemToast.SystemToastId.NARRATOR_TOGGLE,
                             Component.literal("PolyJot"),
                             Component.literal("Exported to resourcepacks/" + packName + ".zip")
                     )
@@ -113,7 +113,7 @@ public class ExportPackScreen extends Screen {
             Minecraft.getInstance().getToasts().addToast(
                     SystemToast.multiline(
                             Minecraft.getInstance(),
-                            SystemToast.SystemToastIds.NARRATOR_TOGGLE,
+                            SystemToast.SystemToastId.NARRATOR_TOGGLE,
                             Component.literal("PolyJot"),
                             Component.literal("§cFailed to export resource pack!")
                     )
@@ -136,18 +136,15 @@ public class ExportPackScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
         guiGraphics.drawCenteredString(this.font, "Export to Resource Pack Folder", centerX, centerY - 55, 0xFFFFFF);
         guiGraphics.drawCenteredString(this.font, "Resource Pack (.zip) Name:", centerX, centerY - 25, 0xAAAAAA);
-        this.nameInput.render(guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.drawCenteredString(this.font, "§8Destination: .minecraft/resourcepacks/<name>.zip", centerX, centerY + 55, 0x888888);
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

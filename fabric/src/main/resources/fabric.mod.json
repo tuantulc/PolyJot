@@ -3,7 +3,7 @@
   "id": "polyjot",
   "version": "${mod_version}",
   "name": "PolyJot \u2014 In-Game Text & Item Name Editor",
-  "description": "In-game text and item name editor for Minecraft 1.20.1.",
+  "description": "In-game text and item name editor for Minecraft 1.21.1.",
   "authors": [
     "Forkeve"
   ],
@@ -23,11 +23,11 @@
     "polyjot.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.21",
-    "minecraft": "1.20.1",
-    "java": ">=17",
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21",
+    "java": ">=21",
     "fabric-api": "*",
-    "cloth-config": ">=11.0.0"
+    "cloth-config": ">=15.0.0"
   },
   "suggests": {
     "modmenu": "*"

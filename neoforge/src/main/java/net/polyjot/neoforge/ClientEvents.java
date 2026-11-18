@@ -1,38 +1,35 @@
-package net.polyjot.client;
+package net.polyjot.neoforge;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.polyjot.PolyJot;
-import net.polyjot.client.screen.ModSelectionScreen;
-import net.polyjot.client.screen.TranslationConfigBuilder;
-import net.polyjot.data.ModTranslationData;
-import net.polyjot.data.TranslationScanner;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.polyjot.PolyJotConstants;
+import net.polyjot.client.PolyJotCommands;
+import net.polyjot.client.screen.ModSelectionScreen;
 import net.polyjot.platform.DiscoveredMod;
 import net.polyjot.platform.Services;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(modid = PolyJot.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = PolyJotConstants.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class ClientEvents {
-
     public static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
             "key.polyjot.open_gui",
             KeyConflictContext.IN_GAME,
-            InputConstants.UNKNOWN,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
             "key.categories.polyjot"
     );
 
-    @Mod.EventBusSubscriber(modid = PolyJot.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = PolyJotConstants.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
         @SubscribeEvent
         public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
@@ -41,8 +38,8 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && Minecraft.getInstance().player != null) {
+    public static void onClientTick(ClientTickEvent.Post event) {
+        if (Minecraft.getInstance().player != null) {
             while (OPEN_GUI_KEY.consumeClick()) {
                 Minecraft.getInstance().setScreen(new ModSelectionScreen(null));
             }

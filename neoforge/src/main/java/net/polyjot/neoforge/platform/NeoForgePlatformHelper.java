@@ -1,10 +1,11 @@
-package net.polyjot.platform.forge;
+package net.polyjot.neoforge.platform;
 
+import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.locale.Language;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.locating.IModFile;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforgespi.language.IModInfo;
+import net.neoforged.neoforgespi.locating.IModFile;
 import net.polyjot.client.LanguageHotReloader;
 import net.polyjot.platform.DiscoveredMod;
 import net.polyjot.platform.IPlatformHelper;
@@ -14,11 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ForgePlatformHelper implements IPlatformHelper {
+public class NeoForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public String getPlatformName() {
-        return "Forge";
+        return "NeoForge";
     }
 
     @Override
@@ -30,7 +31,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public List<DiscoveredMod> getInstalledMods() {
         List<DiscoveredMod> result = new ArrayList<>();
         for (IModInfo mod : ModList.get().getMods()) {
-            result.add(new ForgeDiscoveredMod(mod));
+            result.add(new NeoForgeDiscoveredMod(mod));
         }
         return result;
     }
@@ -39,7 +40,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public DiscoveredMod getMod(String modId) {
         for (IModInfo mod : ModList.get().getMods()) {
             if (mod.getModId().equalsIgnoreCase(modId)) {
-                return new ForgeDiscoveredMod(mod);
+                return new NeoForgeDiscoveredMod(mod);
             }
         }
         return null;
@@ -47,7 +48,23 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public Map<String, String> getLanguageData() {
+        ClientLanguage cl = LanguageHotReloader.findClientLanguage(Language.getInstance());
+        if (cl != null) {
+            return cl.getLanguageData();
+        }
         return Language.getInstance().getLanguageData();
+    }
+
+    @Override
+    public boolean setClientLanguageStorage(ClientLanguage clientLanguage, Map<String, String> storage) {
+        try {
+            java.lang.reflect.Field storageField = ClientLanguage.class.getDeclaredField("storage");
+            storageField.setAccessible(true);
+            storageField.set(clientLanguage, storage);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -60,10 +77,10 @@ public class ForgePlatformHelper implements IPlatformHelper {
         return FMLPaths.GAMEDIR.get();
     }
 
-    private static class ForgeDiscoveredMod implements DiscoveredMod {
+    private static class NeoForgeDiscoveredMod implements DiscoveredMod {
         private final IModInfo modInfo;
 
-        public ForgeDiscoveredMod(IModInfo modInfo) {
+        public NeoForgeDiscoveredMod(IModInfo modInfo) {
             this.modInfo = modInfo;
         }
 

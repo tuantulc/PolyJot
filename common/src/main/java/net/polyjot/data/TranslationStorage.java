@@ -113,7 +113,7 @@ public class TranslationStorage {
             try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath), StandardCharsets.UTF_8)) {
                 JsonObject packMeta = new JsonObject();
                 JsonObject packObj = new JsonObject();
-                packObj.addProperty("pack_format", 15);
+                packObj.addProperty("pack_format", 34);
                 packObj.addProperty("description", "PolyJot " + targetLang + " translations");
                 packMeta.add("pack", packObj);
 

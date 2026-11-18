@@ -1,5 +1,7 @@
 package net.polyjot.platform;
 
+import net.minecraft.client.resources.language.ClientLanguage;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,11 @@ public interface IPlatformHelper {
      * Gets active language key-value mappings from Minecraft.
      */
     Map<String, String> getLanguageData();
+
+    /**
+     * Updates the backing storage map of an existing ClientLanguage instance in-place.
+     */
+    boolean setClientLanguageStorage(ClientLanguage clientLanguage, Map<String, String> storage);
 
     /**
      * Injects updated language mappings straight into Minecraft's memory.

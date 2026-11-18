@@ -68,7 +68,7 @@ public class DumpAllTranslationsScreen extends Screen {
         Minecraft.getInstance().getToasts().addToast(
                 SystemToast.multiline(
                         Minecraft.getInstance(),
-                        SystemToast.SystemToastIds.NARRATOR_TOGGLE,
+                        SystemToast.SystemToastId.NARRATOR_TOGGLE,
                         Component.literal("PolyJot"),
                         Component.literal("Generated files for " + savedCount + " mods in translations/" + this.targetLang)
                 )
@@ -80,7 +80,7 @@ public class DumpAllTranslationsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int centerY = this.height / 2;
@@ -108,8 +108,6 @@ public class DumpAllTranslationsScreen extends Screen {
                 currentY += font.lineHeight + 2;
             }
         }
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

@@ -65,7 +65,7 @@ public class ModSelectionScreen extends Screen {
         this.searchBox = new EditBox(this.font, startX, 22, searchWidth, 20, Component.translatable("gui.polyjot.search_mods"));
         this.searchBox.setHint(Component.translatable("gui.polyjot.search_mods_hint").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
         this.searchBox.setResponder(this::onSearchChanged);
-        this.addWidget(this.searchBox);
+        this.addRenderableWidget(this.searchBox);
         if (!prevQuery.isEmpty()) {
             this.searchBox.setValue(prevQuery);
         }
@@ -99,15 +99,15 @@ public class ModSelectionScreen extends Screen {
         .build());
 
         int dumpBtnX = exportBtnX + exportBtnWidth + gap;
-        Button dumpBtn = Button.builder(Component.translatable("gui.polyjot.dump_missing"), btn -> {
+        Button dumpBtn = Button.builder(Component.translatable("gui.polyjot.dump_all"), btn -> {
             Minecraft.getInstance().setScreen(new DumpAllTranslationsScreen(this, this.targetLang, this.allMods.values()));
         }).bounds(dumpBtnX, 22, dumpBtnWidth, 20)
-        .tooltip(Tooltip.create(Component.translatable("gui.polyjot.dump_missing.tooltip")))
+        .tooltip(Tooltip.create(Component.translatable("gui.polyjot.dump_all.tooltip", this.targetLang)))
         .build();
         this.addRenderableWidget(dumpBtn);
 
-        this.modListWidget = new ModListWidget(this.minecraft, this.width, this.height, 48, this.height - 36, 32);
-        this.addWidget(this.modListWidget);
+        this.modListWidget = new ModListWidget(this.minecraft, this.width, this.height - 84, 48, 32);
+        this.addRenderableWidget(this.modListWidget);
         populateList(prevQuery);
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, btn -> {
@@ -191,14 +191,10 @@ public class ModSelectionScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
-        this.modListWidget.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.searchBox.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         Component title = Component.translatable("gui.polyjot.title").append(" (" + targetLang + ")");
         guiGraphics.drawCenteredString(this.font, title, this.width / 2, 8, 0xFFFFFF);
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
@@ -254,8 +250,8 @@ public class ModSelectionScreen extends Screen {
 
     public static class ModListWidget extends ObjectSelectionList<ModEntry> {
 
-        public ModListWidget(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight) {
-            super(minecraft, width, height, y0, y1, itemHeight);
+        public ModListWidget(Minecraft minecraft, int width, int height, int y, int itemHeight) {
+            super(minecraft, width, height, y, itemHeight);
         }
 
         public void addModEntry(ModEntry entry) {
@@ -298,7 +294,7 @@ public class ModSelectionScreen extends Screen {
                     Minecraft.getInstance().getToasts().addToast(
                             SystemToast.multiline(
                                     Minecraft.getInstance(),
-                                    SystemToast.SystemToastIds.NARRATOR_TOGGLE,
+                                    SystemToast.SystemToastId.NARRATOR_TOGGLE,
                                     Component.translatable("polyjot.name"),
                                     Component.translatable("toast.polyjot.dump_mod", modData.getDisplayName())
                             )
