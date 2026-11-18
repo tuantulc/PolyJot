@@ -8,6 +8,9 @@ run-data/
 *.log
 logs/
 crash-reports/
+run-client/
+run-server/
+*.hprof
 
 .idea/
 *.iml
