@@ -27,8 +27,8 @@
   "gui.polyjot.open_folder.tooltip": "Open translations folder in file explorer",
   "gui.polyjot.export_zip": "Export Zip",
   "gui.polyjot.export_zip.tooltip": "Package all custom translations into a resource pack .zip",
-  "gui.polyjot.dump_missing": "Dump Missing",
-  "gui.polyjot.dump_missing.tooltip": "Dump all untranslated keys for all mods into translations/ for manual editing",
+  "gui.polyjot.dump_all": "Dump All",
+  "gui.polyjot.dump_all.tooltip": "§6Sync & Create All JSON Files\n§7Generate local editable files for all loaded mods in translations/%s/.",
 
   "gui.polyjot.dump": "Dump",
   "gui.polyjot.dumped": "Dumped",
