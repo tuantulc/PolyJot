@@ -1,6 +1,65 @@
 {
+  "polyjot.name": "PolyJot",
   "key.categories.polyjot": "PolyJot",
   "key.polyjot.open_gui": "Open Translation Editor",
+
   "command.polyjot.open": "Opening Translation Editor for: %s",
-  "command.polyjot.not_found": "Mod '%s' not found or has no language keys."
+  "command.polyjot.not_found": "Mod '%s' not found or has no language keys.",
+  "command.polyjot.empty_hand": "You are not holding any item!",
+  "command.polyjot.vanilla_unsupported": "Vanilla items cannot be edited currently.",
+  "command.polyjot.mod_not_found": "Mod '%s' not found!",
+  "command.polyjot.no_keys": "Mod '%s' has no language keys.",
+
+  "gui.polyjot.title": "Translation Manager",
+  "gui.polyjot.search_mods": "Search Mods",
+  "gui.polyjot.search_mods_hint": "Search mods...",
+  "gui.polyjot.search_hint": "Search...",
+  "gui.polyjot.sort_tooltip": "§6Sort: §f%s\n§7Click to cycle sort order.",
+
+  "gui.polyjot.sort.name_asc": "Name (A-Z)",
+  "gui.polyjot.sort.name_desc": "Name (Z-A)",
+  "gui.polyjot.sort.progress_desc": "Progress (High-Low)",
+  "gui.polyjot.sort.progress_asc": "Progress (Low-High)",
+  "gui.polyjot.sort.size_desc": "Keys (High-Low)",
+  "gui.polyjot.sort.size_asc": "Keys (Low-High)",
+
+  "gui.polyjot.open_folder": "Open Folder",
+  "gui.polyjot.open_folder.tooltip": "Open translations folder in file explorer",
+  "gui.polyjot.export_zip": "Export Zip",
+  "gui.polyjot.export_zip.tooltip": "Package all custom translations into a resource pack .zip",
+  "gui.polyjot.dump_missing": "Dump Missing",
+  "gui.polyjot.dump_missing.tooltip": "Dump all untranslated keys for all mods into translations/ for manual editing",
+
+  "gui.polyjot.dump": "Dump",
+  "gui.polyjot.dumped": "Dumped",
+  "gui.polyjot.dump.tooltip_dumped": "Dumped into translations/%s/%s.json",
+  "gui.polyjot.dump.tooltip_already": "Already dumped into translations/%s/%s.json",
+  "gui.polyjot.dump.tooltip_generate": "Generate translations/%s/%s.json for manual editing.",
+  "gui.polyjot.translate": "Translate",
+  "gui.polyjot.easter_egg": "§dYup, PolyJot can edit itself. Inception much?",
+  "gui.polyjot.large_mod_warning": "§eWarning: This mod has %d entries.\n§7Editing very large mods in-game may cause performance lag.\n§fUsing the Dump button and editing the JSON file directly is recommended.",
+
+  "gui.polyjot.filter.all": "Show All",
+  "gui.polyjot.filter.edited": "Show Edited",
+  "gui.polyjot.filter.unchanged": "Show Unchanged",
+  "gui.polyjot.filter.translated": "Show Translated",
+
+  "gui.polyjot.editor_title": "Translating: %s [%s]",
+  "gui.polyjot.category.gameplay": "Gameplay (%d/%d)",
+  "gui.polyjot.category.ui_other": "UI & Other (%d/%d)",
+  "gui.polyjot.category.configs_keys": "Configs & Keys (%d/%d)",
+  "gui.polyjot.category.obsolete": "Unused / Obsolete (%d)",
+
+  "gui.polyjot.warning.obsolete": "§cThis key was removed or renamed in the current mod version.",
+  "gui.polyjot.warning.too_long": "§eText is too long for comfortable in-game editing. We recommend editing this entry directly in the JSON file.",
+  "gui.polyjot.warning.missing_placeholder": "§cMissing placeholder: %s - saving this may cause in-game errors!",
+  "gui.polyjot.warning.save_missing_placeholders": "§eWarning: %d entry/entries have missing placeholders (%s).\n§7You can still save, but this may cause in-game errors!",
+
+  "toast.polyjot.export_success": "Exported resource pack to:\n%s",
+  "toast.polyjot.export_fail": "Failed to export resource pack!",
+  "toast.polyjot.dump_success": "Dumped %d untranslated files",
+  "toast.polyjot.dump_fail": "Failed to dump translations!",
+  "toast.polyjot.dump_mod": "Dumped JSON for %s",
+  "toast.polyjot.save_success": "Saved translations for %s (%s)",
+  "toast.polyjot.save_fail": "Failed to save translations!"
 }

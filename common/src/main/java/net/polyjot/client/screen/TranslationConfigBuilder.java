@@ -2,7 +2,10 @@ package net.polyjot.client.screen;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
+import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
+import me.shedaniel.clothconfig2.gui.widget.SearchFieldEntry;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.polyjot.data.ModTranslationData;
@@ -19,9 +22,14 @@ import java.util.*;
 public class TranslationConfigBuilder {
 
     public static Screen createScreen(Screen parent, ModTranslationData modData, String targetLang) {
+        return createScreen(parent, modData, targetLang, null);
+    }
+
+    public static Screen createScreen(Screen parent, ModTranslationData modData, String targetLang, String initialSearch) {
+        FilterableSearchFieldEntry.setCurrentFilter(FilterMode.ALL);
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Component.literal("Translating: " + modData.getDisplayName() + " [" + modData.getModId() + "]"))
+                .setTitle(Component.translatable("gui.polyjot.editor_title", modData.getDisplayName(), modData.getModId()))
                 .setDoesConfirmSave(true);
 
         List<TranslationEntry> gameplayEntries = new ArrayList<>();
@@ -44,7 +52,7 @@ public class TranslationConfigBuilder {
         List<MultilineTranslationListEntry> allEntries = new ArrayList<>();
 
         if (!gameplayEntries.isEmpty()) {
-            ConfigCategory gameplayCat = builder.getOrCreateCategory(Component.literal("Gameplay (" + countTranslated(gameplayEntries) + "/" + gameplayEntries.size() + ")"));
+            ConfigCategory gameplayCat = builder.getOrCreateCategory(Component.translatable("gui.polyjot.category.gameplay", countTranslated(gameplayEntries), gameplayEntries.size()));
             for (TranslationEntry entry : gameplayEntries) {
                 MultilineTranslationListEntry listEntry = createEntry(entry);
                 allEntries.add(listEntry);
@@ -53,7 +61,7 @@ public class TranslationConfigBuilder {
         }
 
         if (!otherEntries.isEmpty()) {
-            ConfigCategory otherCat = builder.getOrCreateCategory(Component.literal("UI & Other (" + countTranslated(otherEntries) + "/" + otherEntries.size() + ")"));
+            ConfigCategory otherCat = builder.getOrCreateCategory(Component.translatable("gui.polyjot.category.ui_other", countTranslated(otherEntries), otherEntries.size()));
             for (TranslationEntry entry : otherEntries) {
                 MultilineTranslationListEntry listEntry = createEntry(entry);
                 allEntries.add(listEntry);
@@ -62,7 +70,7 @@ public class TranslationConfigBuilder {
         }
 
         if (!noiseEntries.isEmpty()) {
-            ConfigCategory noiseCat = builder.getOrCreateCategory(Component.literal("Configs & Keys (" + countTranslated(noiseEntries) + "/" + noiseEntries.size() + ")"));
+            ConfigCategory noiseCat = builder.getOrCreateCategory(Component.translatable("gui.polyjot.category.configs_keys", countTranslated(noiseEntries), noiseEntries.size()));
             for (TranslationEntry entry : noiseEntries) {
                 MultilineTranslationListEntry listEntry = createEntry(entry);
                 allEntries.add(listEntry);
@@ -71,7 +79,7 @@ public class TranslationConfigBuilder {
         }
 
         if (!obsoleteEntries.isEmpty()) {
-            ConfigCategory obsoleteCat = builder.getOrCreateCategory(Component.literal("Obsolete (" + obsoleteEntries.size() + ")"));
+            ConfigCategory obsoleteCat = builder.getOrCreateCategory(Component.translatable("gui.polyjot.category.obsolete", obsoleteEntries.size()));
             for (TranslationEntry entry : obsoleteEntries) {
                 MultilineTranslationListEntry listEntry = createEntry(entry);
                 allEntries.add(listEntry);
@@ -98,6 +106,44 @@ public class TranslationConfigBuilder {
             }
 
             refreshSaveTooltip.run();
+
+            if (screen instanceof ClothConfigScreen clothScreen && clothScreen.listWidget != null) {
+                try {
+                    java.lang.reflect.Field entriesField = null;
+                    Class<?> c = clothScreen.listWidget.getClass();
+                    while (c != null && c != Object.class) {
+                        try {
+                            entriesField = c.getDeclaredField("entries");
+                            entriesField.setAccessible(true);
+                            break;
+                        } catch (NoSuchFieldException e) {
+                            c = c.getSuperclass();
+                        }
+                    }
+                    if (entriesField != null) {
+                        @SuppressWarnings("rawtypes")
+                        List rawList = (List) entriesField.get(clothScreen.listWidget);
+                        for (int i = 0; i < rawList.size(); i++) {
+                            if (rawList.get(i) instanceof SearchFieldEntry) {
+                                FilterableSearchFieldEntry customSearch = new FilterableSearchFieldEntry(clothScreen, clothScreen.listWidget);
+                                if (initialSearch != null && !initialSearch.isEmpty() && customSearch.getEditBox() != null) {
+                                    customSearch.getEditBox().setValue(initialSearch);
+                                }
+                                rawList.set(i, customSearch);
+                                for (java.lang.reflect.Field f : ClothConfigScreen.class.getDeclaredFields()) {
+                                    if (SearchFieldEntry.class.isAssignableFrom(f.getType())) {
+                                        f.setAccessible(true);
+                                        f.set(clothScreen, customSearch);
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+            }
         });
 
         builder.setSavingRunnable(() -> {
@@ -116,8 +162,8 @@ public class TranslationConfigBuilder {
                         SystemToast.multiline(
                                 Minecraft.getInstance(),
                                 SystemToast.SystemToastIds.NARRATOR_TOGGLE,
-                                Component.literal("PolyJot"),
-                                Component.literal("Saved translations for " + modData.getDisplayName())
+                                Component.translatable("polyjot.name"),
+                                Component.translatable("toast.polyjot.save_success", modData.getDisplayName(), modData.getModId())
                         )
                 );
             }
@@ -144,10 +190,7 @@ public class TranslationConfigBuilder {
 
         if (count > 0) {
             String samples = String.join(", ", missingSamples);
-            Component warning = Component.literal(
-                    "§eWarning: " + count + " entry/entries have missing placeholders (" + samples + ").\n" +
-                    "§7You can still save, but this may cause in-game errors."
-            );
+            Component warning = Component.translatable("gui.polyjot.warning.save_missing_placeholders", count, samples);
             saveButton.setTooltip(Tooltip.create(warning));
         } else {
             saveButton.setTooltip(null);
