@@ -9,7 +9,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = "${mod_id}-forge"
+    archivesName = "${mod_id}-forge${minecraft_version}"
 }
 
 minecraft {
@@ -47,14 +47,12 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-// Include common sources and resources directly into Forge build
 sourceSets.main.java.srcDir project(':common').file('src/main/java')
 sourceSets.main.resources.srcDir project(':common').file('src/main/resources')
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // Cloth Config API (Forge 1.20.1)
     implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:11.1.136")
 }
 
