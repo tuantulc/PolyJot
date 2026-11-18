@@ -10,12 +10,52 @@ import net.polyjot.platform.Services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 public class LanguageHotReloader {
     private static final Logger LOGGER = LogManager.getLogger(LanguageHotReloader.class);
+
+    public static ClientLanguage findClientLanguage(Language root) {
+        if (root == null) {
+            return null;
+        }
+        if (root instanceof ClientLanguage cl) {
+            return cl;
+        }
+
+        // Unwrap delegating Language wrappers (e.g. server-translations-api SystemDelegatedLanguage)
+        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        Deque<Object> queue = new ArrayDeque<>();
+        queue.add(root);
+        visited.add(root);
+
+        while (!queue.isEmpty()) {
+            Object current = queue.poll();
+            Class<?> clazz = current.getClass();
+            while (clazz != null && clazz != Object.class) {
+                for (Field field : clazz.getDeclaredFields()) {
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        continue;
+                    }
+                    try {
+                        field.setAccessible(true);
+                        Object val = field.get(current);
+                        if (val instanceof ClientLanguage cl) {
+                            return cl;
+                        }
+                        if (val instanceof Language && visited.add(val)) {
+                            queue.add(val);
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+                clazz = clazz.getSuperclass();
+            }
+        }
+        return null;
+    }
 
     public static void applyTranslations(Map<String, String> updatedTranslations) {
         if (updatedTranslations == null || updatedTranslations.isEmpty()) {
@@ -24,27 +64,22 @@ public class LanguageHotReloader {
 
         try {
             Language currentLang = Language.getInstance();
+            ClientLanguage clientLang = findClientLanguage(currentLang);
             Map<String, String> currentData = Services.PLATFORM.getLanguageData();
 
             Map<String, String> mergedData = new HashMap<>(currentData);
             mergedData.putAll(updatedTranslations);
+            ImmutableMap<String, String> immutableStorage = ImmutableMap.copyOf(mergedData);
 
-            boolean isRtl = currentLang.isDefaultRightToLeft();
-
-            // try injecting into client language first
-            try {
-                Constructor<ClientLanguage> constructor = ClientLanguage.class.getDeclaredConstructor(Map.class, boolean.class);
-                constructor.setAccessible(true);
-                ClientLanguage newClientLang = constructor.newInstance(mergedData, isRtl);
-                Language.inject(newClientLang);
-                LOGGER.info("Successfully hot-injected {} translations into ClientLanguage.", updatedTranslations.size());
+            // Update existing ClientLanguage in-place so mod mixin fields (e.g. owo$textMap) stay intact
+            if (clientLang != null && Services.PLATFORM.setClientLanguageStorage(clientLang, immutableStorage)) {
+                clearOwoTextCache(clientLang, updatedTranslations.keySet());
+                LOGGER.info("Successfully hot-injected {} translations in-place into ClientLanguage.", updatedTranslations.size());
                 return;
-            } catch (Exception reflectionEx) {
-                LOGGER.warn("Reflection instantiation of ClientLanguage failed, using fallback Language wrapper", reflectionEx);
             }
 
-            // fallback or smth
-            final ImmutableMap<String, String> immutableStorage = ImmutableMap.copyOf(mergedData);
+            // Fallback wrapper if no ClientLanguage instance could be mutated
+            boolean isRtl = currentLang.isDefaultRightToLeft();
             Language customLang = new Language() {
                 @Override
                 public String getOrDefault(String key, String defaultVal) {
@@ -75,6 +110,34 @@ public class LanguageHotReloader {
             LOGGER.info("Successfully hot-injected {} translations via fallback wrapper.", updatedTranslations.size());
         } catch (Exception e) {
             LOGGER.error("Failed to hot-inject translations", e);
+        }
+    }
+
+    private static void clearOwoTextCache(ClientLanguage clientLang, Set<String> editedKeys) {
+        try {
+            Field owoField = clientLang.getClass().getDeclaredField("owo$textMap");
+            owoField.setAccessible(true);
+            Object val = owoField.get(clientLang);
+            if (val instanceof Map<?, ?> map && !map.isEmpty()) {
+                boolean anyPresent = false;
+                for (String key : editedKeys) {
+                    if (map.containsKey(key)) {
+                        anyPresent = true;
+                        break;
+                    }
+                }
+                if (anyPresent) {
+                    Map<Object, Object> copy = new HashMap<>(map);
+                    for (String key : editedKeys) {
+                        copy.remove(key);
+                    }
+                    owoField.set(clientLang, copy);
+                }
+            }
+        } catch (NoSuchFieldException ignored) {
+            // owo-lib not installed
+        } catch (Exception e) {
+            LOGGER.debug("Could not update owo$textMap cache: {}", e.getMessage());
         }
     }
 }
