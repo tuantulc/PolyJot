@@ -149,11 +149,19 @@ public class TranslationConfigBuilder {
         builder.setSavingRunnable(() -> {
             boolean saved = TranslationStorage.saveModTranslations(targetLang, modData);
             if (saved) {
-                // hot-reload without game restart
+                // hot-reload without game restart (includes edits and resets)
+                Map<String, String> currentActive = Services.PLATFORM.getLanguageData();
                 Map<String, String> activeMap = new LinkedHashMap<>();
                 for (TranslationEntry entry : modData.getEntries().values()) {
+                    if (entry.isObsolete()) {
+                        continue;
+                    }
+                    String newVal = entry.getCurrentTranslation();
+                    String existingVal = currentActive.get(entry.getKey());
                     if (entry.isCustomized() && !entry.isUntranslated()) {
-                        activeMap.put(entry.getKey(), entry.getCurrentTranslation());
+                        activeMap.put(entry.getKey(), newVal);
+                    } else if (existingVal != null && !existingVal.equals(newVal)) {
+                        activeMap.put(entry.getKey(), newVal);
                     }
                 }
                 Services.PLATFORM.injectLanguage(activeMap);

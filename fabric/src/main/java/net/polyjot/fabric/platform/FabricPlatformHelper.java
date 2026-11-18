@@ -2,6 +2,7 @@ package net.polyjot.fabric.platform;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.locale.Language;
 import net.polyjot.client.LanguageHotReloader;
 import net.polyjot.fabric.mixin.ClientLanguageAccessor;
@@ -41,11 +42,20 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
     @Override
     public Map<String, String> getLanguageData() {
-        Language current = Language.getInstance();
-        if (current instanceof ClientLanguageAccessor accessor) {
+        ClientLanguage cl = LanguageHotReloader.findClientLanguage(Language.getInstance());
+        if (cl instanceof ClientLanguageAccessor accessor) {
             return accessor.getStorage();
         }
         return Collections.emptyMap();
+    }
+
+    @Override
+    public boolean setClientLanguageStorage(ClientLanguage clientLanguage, Map<String, String> storage) {
+        if (clientLanguage instanceof ClientLanguageAccessor accessor) {
+            accessor.setStorage(storage);
+            return true;
+        }
+        return false;
     }
 
     @Override

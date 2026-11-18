@@ -99,10 +99,10 @@ public class ModSelectionScreen extends Screen {
         .build());
 
         int dumpBtnX = exportBtnX + exportBtnWidth + gap;
-        Button dumpBtn = Button.builder(Component.translatable("gui.polyjot.dump_missing"), btn -> {
+        Button dumpBtn = Button.builder(Component.translatable("gui.polyjot.dump_all"), btn -> {
             Minecraft.getInstance().setScreen(new DumpAllTranslationsScreen(this, this.targetLang, this.allMods.values()));
         }).bounds(dumpBtnX, 22, dumpBtnWidth, 20)
-        .tooltip(Tooltip.create(Component.translatable("gui.polyjot.dump_missing.tooltip")))
+        .tooltip(Tooltip.create(Component.translatable("gui.polyjot.dump_all.tooltip", this.targetLang)))
         .build();
         this.addRenderableWidget(dumpBtn);
 
