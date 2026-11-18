@@ -6,7 +6,7 @@
   "command.polyjot.open": "Opening Translation Editor for: %s",
   "command.polyjot.not_found": "Mod '%s' not found or has no language keys.",
   "command.polyjot.empty_hand": "You are not holding any item!",
-  "command.polyjot.vanilla_unsupported": "Vanilla items cannot be edited currently.",
+  "command.polyjot.vanilla_unsupported": "Vanilla items cannot be edited currently :(",
   "command.polyjot.mod_not_found": "Mod '%s' not found!",
   "command.polyjot.no_keys": "Mod '%s' has no language keys.",
 
@@ -25,8 +25,8 @@
 
   "gui.polyjot.open_folder": "Open Folder",
   "gui.polyjot.open_folder.tooltip": "Open translations folder in file explorer",
-  "gui.polyjot.export_zip": "Export Zip",
-  "gui.polyjot.export_zip.tooltip": "Package all custom translations into a resource pack .zip",
+  "gui.polyjot.export_zip": "Export .zip",
+  "gui.polyjot.export_zip.tooltip": "Package all custom translations into a .zip resource pack",
   "gui.polyjot.dump_all": "Dump All",
   "gui.polyjot.dump_all.tooltip": "§6Sync & Create All JSON Files\n§7Generate local editable files for all loaded mods in translations/%s/.",
 
@@ -52,7 +52,7 @@
 
   "gui.polyjot.warning.obsolete": "§cThis key was removed or renamed in the current mod version.",
   "gui.polyjot.warning.too_long": "§eText is too long for comfortable in-game editing. We recommend editing this entry directly in the JSON file.",
-  "gui.polyjot.warning.missing_placeholder": "§cMissing placeholder: %s - saving this may cause in-game errors!",
+  "gui.polyjot.warning.missing_placeholder": "§cMissing placeholder: %s , saving this may cause in-game errors!",
   "gui.polyjot.warning.save_missing_placeholders": "§eWarning: %d entry/entries have missing placeholders (%s).\n§7You can still save, but this may cause in-game errors!",
 
   "toast.polyjot.export_success": "Exported resource pack to:\n%s",
