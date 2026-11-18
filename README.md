@@ -45,7 +45,7 @@ _(This mod was made to edit **other mods**! If you want to change Vanilla texts,
 
 1.  **(If you're trying to translate a mod to your language):** Change your Minecraft language to the target language.
 2.  **Open the menu:**
-    - Type `/polyjot` or `/lang` in chat, or go to `Mods` -> find **PolyJot** -> click **Config**.
+    - Type `/polyjot` in chat, or go to `Mods` -> find **PolyJot** -> click **Config**.
     - _(Optional)_ You can also set a dedicated keybind in your Minecraft controls.
 3.  **Pick a mod!** Use the search bar to find any mod by name or Mod ID, then click **Translate**.
 4.  **Now you're in the editor.** Type whatever you want in the box on the right.
